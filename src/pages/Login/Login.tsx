@@ -1,20 +1,35 @@
 // MODO ANTIGO import "./Login.module.css";
+import { useState } from "react";
+import { useNavigate } from "react-router";
+
+import axios from "axios";
+import Swal from "sweetalert2";
+
 import styles from "./Login.module.css"; // MODO novo com CSS modules
 import stylesIndex from "../../index.module.css";
-import { useState } from "react";
-import axios from "axios";
 
 function Login() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  function fazerLogin(event) {
-    event.preventDefault();
+  async function fazerLogin(event: React.SubmitEvent) {
+    try {
+      event.preventDefault();
 
-    axios.post("http://localhost:8888/auth/login", {
-      email: email,
-      senha: senha,
-    });
+      await axios.post("http://localhost:8888/auth/login", {
+        email: email,
+        senha: senha,
+      });
+
+      navigate("/mesas");
+    } catch (error) {
+      Swal.fire({
+        title: error.response.data.error,
+        icon: "error",
+      });
+    }
   }
 
   return (
@@ -27,6 +42,7 @@ function Login() {
         <label>Email</label>
         <input
           type="email"
+          required
           placeholder="Digite seu email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -37,6 +53,7 @@ function Login() {
         <label>Senha</label>
         <input
           type="password"
+          required
           placeholder="Digite sua senha"
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
