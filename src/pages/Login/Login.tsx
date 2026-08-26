@@ -18,10 +18,13 @@ function Login() {
     try {
       event.preventDefault();
 
-      await axios.post("http://localhost:8888/auth/login", {
+      const response = await axios.post("http://localhost:8888/auth/login", {
         email: email,
         senha: senha,
       });
+
+      // Salva o token no localstorage para usar depois
+      localStorage.setItem("@dadoslogin", JSON.stringify(response.data));
 
       navigate("/mesas");
     } catch (error) {
