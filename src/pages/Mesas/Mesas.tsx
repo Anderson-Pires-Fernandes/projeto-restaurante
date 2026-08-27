@@ -1,4 +1,3 @@
-import { FaDoorOpen } from "react-icons/fa";
 import { GiWoodenChair } from "react-icons/gi";
 import {
   Dialog,
@@ -10,6 +9,7 @@ import { useNavigate } from "react-router";
 
 import { useEffect, useState } from "react";
 import { getDataLocalStorage } from "../../utils/getDataLocalStorage";
+
 
 import axios from "axios";
 
@@ -28,7 +28,6 @@ type Mesa = {
 };
 
 function Mesas() {
-  
   const navigate = useNavigate();
 
   const [modalAberto, setModalAberto] = useState(false);
@@ -85,23 +84,7 @@ function Mesas() {
 
   return (
     <div>
-      <div className={styles.containerMenu}>
-        <div className={styles.contentLeft}>
-          <span className={styles.logoMenu}>🍽️</span>
-          <h1>Sabor & Arte</h1>
-          <ul>
-            <li>Mesas</li>
-            <li>Pedidos</li>
-          </ul>
-        </div>
-
-        <div className={styles.contentRight}>
-          <span>{dadosLocalStorage.role}</span>
-          <span>
-            <FaDoorOpen />
-          </span>
-        </div>
-      </div>
+    
 
       <h2>Mesas</h2>
       <p>Selecione uma mesa para abrir ou acompanhar o pedido</p>
