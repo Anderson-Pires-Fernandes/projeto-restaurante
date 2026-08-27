@@ -1,5 +1,12 @@
 import { FaDoorOpen } from "react-icons/fa";
 import { GiWoodenChair } from "react-icons/gi";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+import { useNavigate } from "react-router";
 
 import { useEffect, useState } from "react";
 import { getDataLocalStorage } from "../../utils/getDataLocalStorage";
@@ -7,6 +14,7 @@ import { getDataLocalStorage } from "../../utils/getDataLocalStorage";
 import axios from "axios";
 
 import styles from "./Mesas.module.css";
+import stylesIndex from "../../index.module.css";
 
 const dadosLocalStorage = getDataLocalStorage();
 
@@ -20,7 +28,46 @@ type Mesa = {
 };
 
 function Mesas() {
+  
+  const navigate = useNavigate();
+
+  const [modalAberto, setModalAberto] = useState(false);
   const [mesas, setMesas] = useState<Mesa[]>([]);
+  const [mesaClicada, setMesaClicada] = useState<Mesa | null>(null);
+  const [nomeCliente, setNomeCliente] = useState("");
+
+  function abrirModal(mesa: Mesa) {
+    setModalAberto(true);
+    setMesaClicada(mesa);
+  }
+
+  function fecharModal() {
+    setModalAberto(false);
+  }
+
+  async function criarPedido(event: React.SubmitEvent) {
+    try {
+      event.preventDefault();
+
+      await axios.post(
+        "http://localhost:8888/pedidos",
+        {
+          mesa_id: mesaClicada?.id,
+          nome_cliente: nomeCliente,
+          data: "2026-08-26",
+        },
+        {
+          headers: {
+            Authorization: `Bearen ${dadosLocalStorage.token}`,
+          },
+        },
+      );
+
+      navigate("/pedido-items");
+    } catch {
+      alert("Erro ao criar pedido");
+    }
+  }
 
   async function buscarMesas() {
     const response = await axios.get<Mesa[]>("http://localhost:8888/mesas", {
@@ -61,7 +108,11 @@ function Mesas() {
 
       <div className={styles.containerChairs}>
         {mesas.map((mesa) => (
-          <div className={styles.chair} key={mesa.id}>
+          <div
+            className={styles.chair}
+            key={mesa.id}
+            onClick={() => abrirModal(mesa)}
+          >
             <div className={styles.chairHeader}>
               <span>{mesa.reservado ? "Ocupado" : "Livre"}</span>
               <GiWoodenChair />
@@ -71,6 +122,26 @@ function Mesas() {
           </div>
         ))}
       </div>
+
+      <Dialog open={modalAberto} onClose={fecharModal} maxWidth="md">
+        <form onSubmit={criarPedido}>
+          <DialogTitle>{mesaClicada?.nome}</DialogTitle>
+          <DialogContent>
+            <p>Informe o nome do cliente para abrir o pedido</p>
+            <div className={stylesIndex.containerInput}>
+              <label>Nome do cliente</label>
+              <input
+                value={nomeCliente}
+                onChange={(e) => setNomeCliente(e.target.value)}
+                required
+              />
+            </div>
+          </DialogContent>
+          <DialogActions>
+            <button type="submit">Criar pedido</button>
+          </DialogActions>
+        </form>
+      </Dialog>
     </div>
   );
 }
