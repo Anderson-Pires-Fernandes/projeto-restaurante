@@ -6,23 +6,22 @@ import PedidosItems from "./pages/PedidosItems/PedidosItems";
 import Pedidos from "./pages/Pedidos/Pedidos";
 import Chefs from "./pages/Chefs/Chefs";
 
-function App(){
+function App() {
+  const location = useLocation();
 
-    const location = useLocation()
-
-    return (
-       <>
-    {/* !telasNaoMenu.includes(location.pathname) && <Menu /> */}     
-   {location.pathname !== "/" &&  <Menu/>} 
+  return (
+    <>
+      {/* !telasNaoMenu.includes(location.pathname) && <Menu /> */}
+      {location.pathname !== "/" && <Menu />}
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/mesas" element={<Mesas />} />
-        <Route path="/pedido-items" element={<PedidosItems />} />
+        <Route path="/pedido-items/:id" element={<PedidosItems />} />
         <Route path="/pedidos" element={<Pedidos />} />
-         <Route path="/chefes" element={<Chefs />} />
+        <Route path="/chefes" element={<Chefs />} />
       </Routes>
-   </>
-    )
+    </>
+  );
 }
 
 export default App;

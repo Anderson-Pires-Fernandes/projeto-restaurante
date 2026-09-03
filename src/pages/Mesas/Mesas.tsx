@@ -1,19 +1,17 @@
+import styles from "./Mesas.module.css";
 import { GiWoodenChair } from "react-icons/gi";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { getDataLocalStorage } from "../../utils/getDataLocalStorage";
+import { useNavigate } from "react-router";
+
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import { useNavigate } from "react-router";
 
-import { useEffect, useState } from "react";
-import { getDataLocalStorage } from "../../utils/getDataLocalStorage";
-
-
-import axios from "axios";
-
-import styles from "./Mesas.module.css";
 import stylesIndex from "../../index.module.css";
 
 const dadosLocalStorage = getDataLocalStorage();
@@ -25,11 +23,11 @@ type Mesa = {
   reservado: boolean;
   criado_em: string;
   atualizado_em: string;
+  pedido_atual_id: number
 };
 
 function Mesas() {
   const navigate = useNavigate();
-
   const [modalAberto, setModalAberto] = useState(false);
   const [mesas, setMesas] = useState<Mesa[]>([]);
   const [mesaClicada, setMesaClicada] = useState<Mesa | null>(null);
@@ -48,7 +46,7 @@ function Mesas() {
     try {
       event.preventDefault();
 
-      await axios.post(
+      const response = await axios.post(
         "http://localhost:8888/pedidos",
         {
           mesa_id: mesaClicada?.id,
@@ -62,7 +60,7 @@ function Mesas() {
         },
       );
 
-      navigate("/pedido-items");
+      navigate(`/pedido-items/${response.data.id}`);
     } catch {
       alert("Erro ao criar pedido");
     }
@@ -78,14 +76,17 @@ function Mesas() {
     setMesas(response.data);
   }
 
+  function visualizarCardapio(mesa: Mesa) {
+    navigate(`/pedido-items/${mesa.pedido_atual_id}`);
+  }
+
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     buscarMesas();
   }, []); // Deve executar durante a renderização inicial da tela
 
   return (
     <div>
-    
-
       <h2>Mesas</h2>
       <p>Selecione uma mesa para abrir ou acompanhar o pedido</p>
 
@@ -94,21 +95,26 @@ function Mesas() {
           <div
             className={styles.chair}
             key={mesa.id}
-            onClick={() => abrirModal(mesa)}
+            onClick={
+              mesa.pedido_atual_id === null
+                ? () => abrirModal(mesa)
+                : () => visualizarCardapio(mesa)
+            }
           >
+            {mesa.nome}
             <div className={styles.chairHeader}>
               <span>{mesa.reservado ? "Ocupado" : "Livre"}</span>
               <GiWoodenChair />
             </div>
             <h3>{mesa.nome}</h3>
-            <span>{mesa.quantidade_lugares || 0}</span>
+            <span>{mesa.quantidade_lugares || 0} lugares</span>
           </div>
         ))}
       </div>
 
       <Dialog open={modalAberto} onClose={fecharModal} maxWidth="md">
         <form onSubmit={criarPedido}>
-          <DialogTitle>{mesaClicada?.nome}</DialogTitle>
+          <DialogTitle>Mesa {mesaClicada?.nome}</DialogTitle>
           <DialogContent>
             <p>Informe o nome do cliente para abrir o pedido</p>
             <div className={stylesIndex.containerInput}>
